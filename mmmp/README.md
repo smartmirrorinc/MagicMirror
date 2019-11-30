@@ -15,6 +15,76 @@ Config file must be sanitized to allow parsing it with Pythons JSON module:
 - No comments allowed in config file
 - All property names must be enclosed in double quotes, e.g. with `sed -i 's/\([a-zA-Z]\+\):/"\1":/' config.js`
 
+Example valid config.js:
+
+    var config = {
+            "address": "localhost", 
+            "ipWhitelist": [
+                    "127.0.0.1", 
+                    "::ffff:127.0.0.1", 
+                    "::1"
+            ], 
+            "language": "da", 
+            "modules": [
+                    {
+                            "module": "alert"
+                    }, 
+                    {
+                            "module": "clock", 
+                            "position": "top_left"
+                    }, 
+                    {
+                            "config": {
+                                    "calendars": [
+                                            {
+                                                    "symbol": "calendar-check", 
+                                                    "url": "webcal://www.calendarlabs.com/ical-calendar/ics/43/Denmark_Holidays.ics"
+                                            }
+                                    ]
+                            }, 
+                            "header": "DK Holidays", 
+                            "module": "calendar", 
+                            "position": "top_left"
+                    }, 
+                    {
+                            "module": "compliments", 
+                            "position": "lower_third"
+                    }, 
+                    {
+                            "config": {
+                                    "broadcastNewsFeeds": true, 
+                                    "broadcastNewsUpdates": true, 
+                                    "feeds": [
+                                            {
+                                                    "title": "DR", 
+                                                    "url": "http://www.dr.dk/nyheder/service/feeds/allenyheder"
+                                            }
+                                    ], 
+                                    "showPublishDate": true, 
+                                    "showSourceTitle": true
+                            }, 
+                            "module": "newsfeed", 
+                            "position": "bottom_bar"
+                    }, 
+                    {
+                            "module": "MMM-ip", 
+                            "position": "bottom_right"
+                    }, 
+                    {
+                            "module": "updatenotification", 
+                            "position": "top_bar"
+                    }
+            ], 
+            "port": 8081, 
+            "timeFormat": 24, 
+            "units": "metric"
+    };
+
+    /*************** DO NOT EDIT THE LINE BELOW ***************/
+    if (typeof module !== "undefined") {module.exports = config;}
+
+Or just upload a config through the `/top/` endpoint.
+
 Tested with Python version 3.7.4 and flask version 1.1.1.
 
 ## Top
@@ -56,25 +126,6 @@ Tested with Python version 3.7.4 and flask version 1.1.1.
         {
           "module": "compliments", 
           "position": "lower_third"
-        }, 
-        {
-          "config": {
-            "appid": "3637dbfe421257bc0195ee40facc8bfc", 
-            "location": "Aalborg", 
-            "locationID": "2624886"
-          }, 
-          "module": "currentweather", 
-          "position": "top_right"
-        }, 
-        {
-          "config": {
-            "appid": "3637dbfe421257bc0195ee40facc8bfc", 
-            "location": "Aalborg", 
-            "locationID": "2624886"
-          }, 
-          "header": "Weather Forecast", 
-          "module": "weatherforecast", 
-          "position": "top_right"
         }, 
         {
           "config": {
