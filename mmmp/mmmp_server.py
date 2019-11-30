@@ -28,6 +28,16 @@ def _ret_invalid_request(missing_property):
     return "Invalid request, missing property '{}'".format(missing_property), 500
 
 
+def _traverse_module(module, path):
+    end_node = module[0]
+    for i in range(len(path)):
+        if path[i] not in end_node:
+            return False, _ret_unknown_param("/".join(path[:i+1]))
+        end_node = end_node[path[i]]
+
+    return True, end_node
+
+
 def write_config(config_json):
     """Write Python dict as JSON to format compatible with MagicMirror JS"""
     with open(CONFIG_FILE_PATH, "w") as f:
@@ -150,40 +160,54 @@ def module_set(module):
         return _ret_unknown_action(action)
 
 
-@app.route('/modules/<string:modulename>/<string:param>/', methods=['GET'])
-def module_get_param(modulename, param):
+@app.route('/modules/<string:modulename>/<path:path>/', methods=['GET'])
+def module_get_path(modulename, path):
     config = read_config()
     module = [x for x in config["modules"] if x["module"] == modulename]
 
     if len(module) != 1:
         return _ret_unknown_module(modulename)
-    if param not in module[0]:
-        return _ret_unknown_param(param)
 
-    ret = {"value": module[0][param]}
+    path = path.split("/")
+
+    success, end_node = _traverse_module(module, path)
+    if not success:
+        return end_node
+
+    ret = {"value": end_node}
     return ret
 
 
-@app.route('/modules/<string:modulename>/<string:param>/', methods=['POST'])
-def module_set_param(modulename, param):
+@app.route('/modules/<string:modulename>/<path:path>/', methods=['POST'])
+def module_set_path(modulename, path):
     config = read_config()
     module = [x for x in config["modules"] if x["module"] == modulename]
+    path = path.split("/")
 
     if len(module) != 1:
         return _ret_unknown_module(modulename)
-    if param not in module[0]:
-        return _ret_unknown_param(param)
 
     action = request.json["action"]
     if action == "update":
         if "value" not in request.json:
             return _ret_invalid_request("value")
-        module[0][param] = request.json["value"]
+
+        success, end_node = _traverse_module(module, path[:-1])
+        if not success:
+            return end_node
+
+        end_node[path[-1]] = request.json["value"]
+
     elif action == "delete":
-        del module[0][param]
+        success, end_node = _traverse_module(module, path[:-1])
+        if not success:
+            return end_node
+
+        del end_node[path[-1]]
+
     else:
         return _ret_unknown_action(action)
-
+        
     write_config(config)
     return _ret_ok()
 
