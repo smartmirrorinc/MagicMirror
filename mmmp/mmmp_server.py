@@ -1,5 +1,6 @@
 """MagicMirror Management Protocol Server"""
 import os
+import subprocess
 from flask import Flask, request
 import json
 
@@ -56,6 +57,12 @@ def read_config():
         config_json += "}"
 
     return json.loads(config_json)
+
+
+@app.route('/restart/', methods=['GET'])
+def restart():
+    subprocess.call("pm2 restart mm".split(" "))
+    return _ret_ok()
 
 
 @app.route('/top/', methods=['GET'])
