@@ -5,9 +5,17 @@ Manipulate MagicMirror configuration and control MagicMirror in various ways thr
 Requires Python3 and Flask. Run with:
 
     cd MagicMirror/mmmp/
-	python3 mmmp_server.py
+    python3 mmmp_server.py
 
 Currently runs in debug mode and uses unsafe webserver. Manipulates local files (config.js). Use at own risk.
+
+Config file must be sanitized to allow parsing it with Pythons JSON module:
+
+- Only double quotes allowed
+- No comments allowed in config file
+- All property names must be enclosed in double quotes, e.g. with `sed -i 's/\([a-zA-Z]\+\):/"\1":/' config.js`
+
+Tested with Python version 3.7.4 and flask version 1.1.1.
 
 ## Top
 
