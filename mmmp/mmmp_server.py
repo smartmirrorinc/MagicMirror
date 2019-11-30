@@ -69,9 +69,11 @@ def read_config():
     return json.loads(config_json)
 
 
-@app.route('/manage/restart/', methods=['GET'])
-def manage_restart():
-    subprocess.call("pm2 restart mm".split(" "))
+@app.route('/manage/<string:action>/', methods=['GET'])
+def manage_restart(action):
+    if action not in ["start", "stop", "restart"]:
+        return _ret_unknown_action(action)
+    subprocess.call("pm2 {} mm".format(action).split(" "))
     return _ret_ok()
 
 
