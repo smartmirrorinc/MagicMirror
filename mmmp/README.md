@@ -89,7 +89,7 @@ Tested with Python version 3.7.4 and flask version 1.1.1.
 
 ## Top
 
-    [tausen@tausen-t450s mmmp]$ curl http://localhost:5000/top/ > allconf.json
+    [tausen@tausen-t450s mmmp]$ curl http://localhost:5000/config/top/ > allconf.json
       % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
                                      Dload  Upload   Total   Spent    Left  Speed
     100  1757  100  1757    0     0   857k      0 --:--:-- --:--:-- --:--:--  857k
@@ -161,54 +161,54 @@ Tested with Python version 3.7.4 and flask version 1.1.1.
     [tausen@tausen-t450s mmmp]$ sed -i 's/8080/8081/' allconf.json 
     [tausen@tausen-t450s mmmp]$ grep 8081 allconf.json 
       "port": 8081, 
-    [tausen@tausen-t450s mmmp]$ curl -d "@allconf.json" -H "Content-Type: application/json" -X POST http://localhost:5000/top/
+    [tausen@tausen-t450s mmmp]$ curl -d "@allconf.json" -H "Content-Type: application/json" -X POST http://localhost:5000/config/top/
     OK[tausen@tausen-t450s mmmp]$ 
-    [tausen@tausen-t450s mmmp]$ curl http://localhost:5000/top/ | grep port
+    [tausen@tausen-t450s mmmp]$ curl http://localhost:5000/config/top/ | grep port
       % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
                                      Dload  Upload   Total   Spent    Left  Speed
     100  1757  100  1757    0     0   857k      0 --:--:-- --:--:-- --:--:--  857k
       "port": 8081,
-    [tausen@tausen-t450s mmmp]$ curl -d '{"action": "update", "value": 8080}' -H "Content-Type: application/json" -X POST http://localhost:5000/top/port/
+    [tausen@tausen-t450s mmmp]$ curl -d '{"action": "update", "value": 8080}' -H "Content-Type: application/json" -X POST http://localhost:5000/config/top/port/
     OK[tausen@tausen-t450s mmmp]$
 
 ## Top param
 
-    [tausen@tausen-t450s mmmp]$ curl http://localhost:5000/top/port/
+    [tausen@tausen-t450s mmmp]$ curl http://localhost:5000/config/top/port/
     {
       "value": 8080
     }
-    [tausen@tausen-t450s mmmp]$ curl -d '{"action": "update", "value": 8081}' -H "Content-Type: application/json" -X POST http://localhost:5000/top/port/
-    OK[tausen@tausen-t450s mmmp]$ curl http://localhost:5000/top/port/
+    [tausen@tausen-t450s mmmp]$ curl -d '{"action": "update", "value": 8081}' -H "Content-Type: application/json" -X POST http://localhost:5000/config/top/port/
+    OK[tausen@tausen-t450s mmmp]$ curl http://localhost:5000/config/top/port/
     {
       "value": 8081
     }
-    [tausen@tausen-t450s mmmp]$ curl -d '{"action": "update", "value": 8080}' -H "Content-Type: application/json" -X POST http://localhost:5000/top/port/
+    [tausen@tausen-t450s mmmp]$ curl -d '{"action": "update", "value": 8080}' -H "Content-Type: application/json" -X POST http://localhost:5000/config/top/port/
     OK[tausen@tausen-t450s mmmp]$ 
-    [tausen@tausen-t450s mmmp]$ curl http://localhost:5000/top/port/
+    [tausen@tausen-t450s mmmp]$ curl http://localhost:5000/config/top/port/
     {
       "value": 8080
     }
-    [tausen@tausen-t450s mmmp]$ curl -d '{"action": "delete"}' -H "Content-Type: application/json" -X POST http://localhost:5000/top/port/
+    [tausen@tausen-t450s mmmp]$ curl -d '{"action": "delete"}' -H "Content-Type: application/json" -X POST http://localhost:5000/config/top/port/
     OK[tausen@tausen-t450s mmmp]$ 
-    [tausen@tausen-t450s mmmp]$ curl http://localhost:5000/top/port/
+    [tausen@tausen-t450s mmmp]$ curl http://localhost:5000/config/top/port/
     ...
     KeyError: 'port'
     ...
-    [tausen@tausen-t450s mmmp]$ curl -d '{"action": "update", "value": 8080}' -H "Content-Type: application/json" -X POST http://localhost:5000/top/port/
+    [tausen@tausen-t450s mmmp]$ curl -d '{"action": "update", "value": 8080}' -H "Content-Type: application/json" -X POST http://localhost:5000/config/top/port/
     OK[tausen@tausen-t450s mmmp]$ 
-    [tausen@tausen-t450s mmmp]$ curl http://localhost:5000/top/ | grep port
+    [tausen@tausen-t450s mmmp]$ curl http://localhost:5000/config/top/ | grep port
       % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
                                      Dload  Upload   Total   Spent    Left  Speed
     100  1757  100  1757    0     0   857k      0 --:--:-- --:--:-- --:--:--  857k
       "port": 8080, 
-    [tausen@tausen-t450s mmmp]$ curl http://localhost:5000/top/port/
+    [tausen@tausen-t450s mmmp]$ curl http://localhost:5000/config/top/port/
     {
       "value": 8080
     }
 
 ## Modules
 
-    [tausen@tausen-t450s mmmp]$ curl http://localhost:5000/modules/
+    [tausen@tausen-t450s mmmp]$ curl http://localhost:5000/config/modules/
     {
       "modules": [
         "alert", 
@@ -222,42 +222,42 @@ Tested with Python version 3.7.4 and flask version 1.1.1.
         "updatenotification"
       ]
     }
-    [tausen@tausen-t450s mmmp]$ curl http://localhost:5000/modules/alert/
+    [tausen@tausen-t450s mmmp]$ curl http://localhost:5000/config/modules/alert/
     {
       "value": {
         "module": "alert"
       }
     }
-    [tausen@tausen-t450s mmmp]$ curl http://localhost:5000/modules/clock/
+    [tausen@tausen-t450s mmmp]$ curl http://localhost:5000/config/modules/clock/
     {
       "value": {
         "module": "clock", 
         "position": "top_left"
       }
     }
-    [tausen@tausen-t450s mmmp]$ curl http://localhost:5000/modules/clock/position/
+    [tausen@tausen-t450s mmmp]$ curl http://localhost:5000/config/modules/clock/position/
     {
       "value": "top_left"
     }
-    [tausen@tausen-t450s mmmp]$ curl -d '{"action": "update", "value": "bottom_left"}' -H "Content-Type: application/json" -X POST http://localhost:5000/modules/clock/position/
+    [tausen@tausen-t450s mmmp]$ curl -d '{"action": "update", "value": "bottom_left"}' -H "Content-Type: application/json" -X POST http://localhost:5000/config/modules/clock/position/
     OK[tausen@tausen-t450s mmmp]$ 
-    [tausen@tausen-t450s mmmp]$ curl http://localhost:5000/modules/clock/position/
+    [tausen@tausen-t450s mmmp]$ curl http://localhost:5000/config/modules/clock/position/
     {
       "value": "bottom_left"
     }
-    [tausen@tausen-t450s mmmp]$ curl -d '{"action": "update", "value": "top_left"}' -H "Content-Type: application/json" -X POST http://localhost:5000/modules/clock/position/
-    OK[tausen@tausen-t450s mmmp]$ curl http://localhost:5000/modules/clock/position/
+    [tausen@tausen-t450s mmmp]$ curl -d '{"action": "update", "value": "top_left"}' -H "Content-Type: application/json" -X POST http://localhost:5000/config/modules/clock/position/
+    OK[tausen@tausen-t450s mmmp]$ curl http://localhost:5000/config/modules/clock/position/
     {
       "value": "top_left"
     }
-    [tausen@tausen-t450s mmmp]$ curl http://localhost:5000/modules/clock/
+    [tausen@tausen-t450s mmmp]$ curl http://localhost:5000/config/modules/clock/
     {
       "value": {
         "module": "clock", 
         "position": "top_left"
       }
     }
-    [tausen@tausen-t450s mmmp]$ curl http://localhost:5000/modules/
+    [tausen@tausen-t450s mmmp]$ curl http://localhost:5000/config/modules/
     {
       "modules": [
         "alert", 
@@ -271,9 +271,9 @@ Tested with Python version 3.7.4 and flask version 1.1.1.
         "updatenotification"
       ]
     }
-    [tausen@tausen-t450s mmmp]$ curl -d '{"action": "add", "value": {"module": "testy", "position": "top_left", "saf": 123}}' -H "Content-Type: application/json" -X POST http://localhost:5000/modules/
+    [tausen@tausen-t450s mmmp]$ curl -d '{"action": "add", "value": {"module": "testy", "position": "top_left", "saf": 123}}' -H "Content-Type: application/json" -X POST http://localhost:5000/config/modules/
     OK[tausen@tausen-t450s mmmp]$ 
-    [tausen@tausen-t450s mmmp]$ curl http://localhost:5000/modules/
+    [tausen@tausen-t450s mmmp]$ curl http://localhost:5000/config/modules/
     {
       "modules": [
         "alert", 
@@ -288,7 +288,7 @@ Tested with Python version 3.7.4 and flask version 1.1.1.
         "testy"
       ]
     }
-    [tausen@tausen-t450s mmmp]$ curl http://localhost:5000/modules/testy/
+    [tausen@tausen-t450s mmmp]$ curl http://localhost:5000/config/modules/testy/
     {
       "value": {
         "module": "testy", 
@@ -296,9 +296,9 @@ Tested with Python version 3.7.4 and flask version 1.1.1.
         "saf": 123
       }
     }
-    [tausen@tausen-t450s mmmp]$ curl -d '{"action": "delete"}' -H "Content-Type: application/json" -X POST http://localhost:5000/modules/testy/
+    [tausen@tausen-t450s mmmp]$ curl -d '{"action": "delete"}' -H "Content-Type: application/json" -X POST http://localhost:5000/config/modules/testy/
     OK[tausen@tausen-t450s mmmp]$ 
-    [tausen@tausen-t450s mmmp]$ curl http://localhost:5000/modules/
+    [tausen@tausen-t450s mmmp]$ curl http://localhost:5000/config/modules/
     {
       "modules": [
         "alert", 

@@ -69,25 +69,25 @@ def read_config():
     return json.loads(config_json)
 
 
-@app.route('/restart/', methods=['GET'])
-def restart():
+@app.route('/manage/restart/', methods=['GET'])
+def manage_restart():
     subprocess.call("pm2 restart mm".split(" "))
     return _ret_ok()
 
 
-@app.route('/top/', methods=['GET'])
-def top_get():
+@app.route('/config/top/', methods=['GET'])
+def config_top_get():
     return read_config()
 
 
-@app.route('/top/', methods=['POST'])
-def top_set():
+@app.route('/config/top/', methods=['POST'])
+def config_top_set():
     write_config(request.json)
     return _ret_ok()
 
 
-@app.route('/top/<path:path>/', methods=['GET'])
-def top_param_get(path):
+@app.route('/config/top/<path:path>/', methods=['GET'])
+def config_top_path_get(path):
     config = read_config()
 
     path = path.split("/")
@@ -99,8 +99,8 @@ def top_param_get(path):
     return ret
 
 
-@app.route('/top/<path:path>/', methods=['POST'])
-def top_param_set(path):
+@app.route('/config/top/<path:path>/', methods=['POST'])
+def config_top_path_set(path):
     config = read_config()
     action = request.json["action"]
 
@@ -122,15 +122,15 @@ def top_param_set(path):
     return _ret_ok()
 
 
-@app.route('/modules/', methods=['GET'])
-def module_list():
+@app.route('/config/modules/', methods=['GET'])
+def config_module_list():
     config = read_config()
     ret = {"modules": [x["module"] for x in config["modules"]]}
     return ret
 
 
-@app.route('/modules/', methods=['POST'])
-def module_add():
+@app.route('/config/modules/', methods=['POST'])
+def config_module_add():
     config = read_config()
     action = request.json["action"]
 
@@ -144,8 +144,8 @@ def module_add():
         return _ret_unknown_action(action)
 
 
-@app.route('/modules/<string:module>/', methods=['GET'])
-def module_get(module):
+@app.route('/config/modules/<string:module>/', methods=['GET'])
+def config_module_get(module):
     config = read_config()
     module = [x for x in config["modules"] if x["module"] == module]
 
@@ -156,8 +156,8 @@ def module_get(module):
     return ret
 
 
-@app.route('/modules/<string:module>/', methods=['POST'])
-def module_set(module):
+@app.route('/config/modules/<string:module>/', methods=['POST'])
+def config_module_set(module):
     config = read_config()
 
     action = request.json["action"]
@@ -171,8 +171,8 @@ def module_set(module):
         return _ret_unknown_action(action)
 
 
-@app.route('/modules/<string:modulename>/<path:path>/', methods=['GET'])
-def module_get_path(modulename, path):
+@app.route('/config/modules/<string:modulename>/<path:path>/', methods=['GET'])
+def config_module_get_path(modulename, path):
     config = read_config()
     module = [x for x in config["modules"] if x["module"] == modulename]
 
@@ -189,8 +189,8 @@ def module_get_path(modulename, path):
     return ret
 
 
-@app.route('/modules/<string:modulename>/<path:path>/', methods=['POST'])
-def module_set_path(modulename, path):
+@app.route('/config/modules/<string:modulename>/<path:path>/', methods=['POST'])
+def config_module_set_path(modulename, path):
     config = read_config()
     module = [x for x in config["modules"] if x["module"] == modulename]
     path = path.split("/")
