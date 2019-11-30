@@ -29,7 +29,7 @@ def _ret_invalid_request(missing_property):
 
 
 def _traverse_module(module, path):
-    end_node = module[0]
+    end_node = module
     for i in range(len(path)):
         if path[i] not in end_node:
             return False, _ret_unknown_param("/".join(path[:i+1]))
@@ -86,24 +86,35 @@ def top_set():
     return _ret_ok()
 
 
-@app.route('/top/<string:param>/', methods=['GET'])
-def top_param_get(param):
+@app.route('/top/<path:path>/', methods=['GET'])
+def top_param_get(path):
     config = read_config()
-    ret = {"value": config[param]}
+
+    path = path.split("/")
+    success, end_node = _traverse_module(config, path)
+    if not success:
+        return end_node
+
+    ret = {"value": end_node}
     return ret
 
 
-@app.route('/top/<string:param>/', methods=['POST'])
-def top_param_set(param):
+@app.route('/top/<path:path>/', methods=['POST'])
+def top_param_set(path):
     config = read_config()
     action = request.json["action"]
+
+    path = path.split("/")
+    success, end_node = _traverse_module(config, path[:-1])
+    if not success:
+        return end_node
 
     if action == "update":
         if "value" not in request.json:
             return _ret_invalid_request("value")
-        config[param] = request.json["value"]
+        end_node[path[-1]] = request.json["value"]
     elif action == "delete":
-        del config[param]
+        del end_node[path[-1]]
     else:
         return _ret_unknown_action(action)
 
@@ -170,7 +181,7 @@ def module_get_path(modulename, path):
 
     path = path.split("/")
 
-    success, end_node = _traverse_module(module, path)
+    success, end_node = _traverse_module(module[0], path)
     if not success:
         return end_node
 
@@ -192,14 +203,14 @@ def module_set_path(modulename, path):
         if "value" not in request.json:
             return _ret_invalid_request("value")
 
-        success, end_node = _traverse_module(module, path[:-1])
+        success, end_node = _traverse_module(module[0], path[:-1])
         if not success:
             return end_node
 
         end_node[path[-1]] = request.json["value"]
 
     elif action == "delete":
-        success, end_node = _traverse_module(module, path[:-1])
+        success, end_node = _traverse_module(module[0], path[:-1])
         if not success:
             return end_node
 
