@@ -28,6 +28,9 @@ Module.register("compliments", {
 				"Wow, you look hot!",
 				"You look nice!",
 				"Hi, sexy!"
+			],
+			"....-01-01": [
+				"Happy new year!"
 			]
 		},
 		updateInterval: 30000,
@@ -36,9 +39,11 @@ Module.register("compliments", {
 		morningStartTime: 3,
 		morningEndTime: 12,
 		afternoonStartTime: 12,
-		afternoonEndTime: 17
+		afternoonEndTime: 17,
+		random: true,
+		mockDate: null
 	},
-
+	lastIndexUsed:-1,
 	// Set currentweather from module
 	currentWeatherType: "",
 
@@ -101,6 +106,7 @@ Module.register("compliments", {
 	 */
 	complimentArray: function() {
 		var hour = moment().hour();
+		var date = this.config.mockDate ? this.config.mockDate : moment().format("YYYY-MM-DD");
 		var compliments;
 
 		if (hour >= this.config.morningStartTime && hour < this.config.morningEndTime && this.config.compliments.hasOwnProperty("morning")) {
@@ -120,6 +126,12 @@ Module.register("compliments", {
 		}
 
 		compliments.push.apply(compliments, this.config.compliments.anytime);
+
+		for (entry in this.config.compliments) {
+			if (new RegExp(entry).test(date)) {
+				compliments.push.apply(compliments, this.config.compliments[entry]);
+			}
+		}
 
 		return compliments;
 	},
@@ -147,19 +159,43 @@ Module.register("compliments", {
 	 * return compliment string - A compliment.
 	 */
 	randomCompliment: function() {
+		// get the current time of day compliments list
 		var compliments = this.complimentArray();
-		var index = this.randomIndex(compliments);
+		// variable for index to next message to display
+		let index = 0;
+		// are we randomizing
+		if(this.config.random){
+			// yes
+			index = this.randomIndex(compliments);
+		}
+		else{
+			// no, sequential
+			// if doing sequential, don't fall off the end
+			index = (this.lastIndexUsed >= (compliments.length-1))?0: ++this.lastIndexUsed;
+		}
 
-		return compliments[index];
+		return compliments[index] || "";
 	},
 
 	// Override dom generator.
 	getDom: function() {
-		var complimentText = this.randomCompliment();
-
-		var compliment = document.createTextNode(complimentText);
 		var wrapper = document.createElement("div");
 		wrapper.className = this.config.classes ? this.config.classes : "thin xlarge bright pre-line";
+		// get the compliment text
+		var complimentText = this.randomCompliment();
+		// split it into parts on newline text
+		var parts = complimentText.split("\n");
+		// create a span to hold it all
+		var compliment = document.createElement("span");
+		// process all the parts of the compliment text
+		for (part of parts){
+			// create a text element for each part
+			compliment.appendChild(document.createTextNode(part));
+			// add a break `
+			compliment.appendChild(document.createElement("BR"));
+		}
+		// remove the last break
+		compliment.lastElementChild.remove();
 		wrapper.appendChild(compliment);
 
 		return wrapper;

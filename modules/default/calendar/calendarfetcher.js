@@ -28,7 +28,7 @@ var CalendarFetcher = function(url, reloadInterval, excludedEvents, maximumEntri
 		nodeVersion = Number(process.version.match(/^v(\d+\.\d+)/)[1]);
 		var opts = {
 			headers: {
-				"User-Agent": "Mozilla/5.0 (Node.js "+ nodeVersion + ") MagicMirror/"  + global.version +  " (https://github.com/MichMich/MagicMirror/)"
+				"User-Agent": "Mozilla/5.0 (Node.js "+ nodeVersion + ") MagicMirror/" + global.version + " (https://github.com/MichMich/MagicMirror/)"
 			},
 			gzip: true
 		};
@@ -184,7 +184,14 @@ var CalendarFetcher = function(url, reloadInterval, excludedEvents, maximumEntri
 
 						// For recurring events, get the set of start dates that fall within the range
 						// of dates we"re looking for.
-						var dates = rule.between(past, future, true, limitFunction);
+						// kblankenship1989 - to fix issue #1798, converting all dates to locale time first, then converting back to UTC time
+						var pastLocal = moment(past).subtract(past.getTimezoneOffset(), "minutes").toDate();
+						var futureLocal = moment(future).subtract(future.getTimezoneOffset(), "minutes").toDate();
+						var datesLocal = rule.between(pastLocal, futureLocal, true, limitFunction);
+						var dates = datesLocal.map(function(dateLocal) {
+							var date = moment(dateLocal).add(dateLocal.getTimezoneOffset(), "minutes").toDate();
+							return date;
+						});
 
 						// The "dates" array contains the set of dates within our desired date range range that are valid
 						// for the recurrence rule.  *However*, it"s possible for us to have a specific recurrence that
@@ -242,7 +249,7 @@ var CalendarFetcher = function(url, reloadInterval, excludedEvents, maximumEntri
 								showRecurrence = false;
 							}
 
-							endDate  = moment(parseInt(startDate.format("x")) + duration, "x");
+							endDate = moment(parseInt(startDate.format("x")) + duration, "x");
 							if (startDate.format("x") == endDate.format("x")) {
 								endDate = endDate.endOf("day");
 							}
@@ -306,6 +313,11 @@ var CalendarFetcher = function(url, reloadInterval, excludedEvents, maximumEntri
 							continue;
 						}
 
+						// adjust start date so multiple day events will be displayed as happening today even though they started some days ago already
+						if (fullDayEvent && startDate <= today) {
+							startDate = moment(today);
+						}
+
 						// Every thing is good. Add it to the list.
 
 						newEvents.push({
@@ -355,7 +367,7 @@ var CalendarFetcher = function(url, reloadInterval, excludedEvents, maximumEntri
 	 * return bool - The event is a fullday event.
 	 */
 	var isFullDayEvent = function(event) {
-		if (event.start.length === 8) {
+		if (event.start.length === 8 || event.start.dateOnly) {
 			return true;
 		}
 

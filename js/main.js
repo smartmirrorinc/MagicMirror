@@ -1,5 +1,4 @@
 /* global  Log, Loader, Module, config, defaults */
-/* jshint -W020, esversion: 6 */
 
 /* Magic Mirror
  * Main System
@@ -39,11 +38,13 @@ var MM = (function() {
 			dom.opacity = 0;
 			wrapper.appendChild(dom);
 
-			if (typeof module.getHeader() !== "undefined" && module.getHeader() !== "") {
-				var moduleHeader = document.createElement("header");
-				moduleHeader.innerHTML = module.getHeader();
-				moduleHeader.className = "module-header";
-				dom.appendChild(moduleHeader);
+			var moduleHeader = document.createElement("header");
+			moduleHeader.innerHTML = module.getHeader();
+			moduleHeader.className = "module-header";
+			dom.appendChild(moduleHeader);
+
+			if (typeof module.getHeader() === "undefined" || module.getHeader() !== "") {
+				moduleHeader.style = "display: none;";
 			}
 
 			var moduleContent = document.createElement("div");
@@ -210,9 +211,8 @@ var MM = (function() {
 		contentWrapper[0].innerHTML = "";
 		contentWrapper[0].appendChild(newContent);
 
-		if( headerWrapper.length > 0 && newHeader) {
-			headerWrapper[0].innerHTML = newHeader;
-		}
+		headerWrapper[0].innerHTML = newHeader;
+		headerWrapper[0].style = headerWrapper.length > 0 && newHeader ? undefined : "display: none;";
 	};
 
 	/* hideModule(module, speed, callback)
@@ -305,7 +305,9 @@ var MM = (function() {
 			module.showHideTimer = setTimeout(function() {
 				if (typeof callback === "function") { callback(); }
 			}, speed);
-
+		} else {
+			// invoke callback
+			if (typeof callback === "function") { callback(); }
 		}
 	};
 
@@ -376,7 +378,7 @@ var MM = (function() {
 		 *
 		 * return array - Filtered collection of modules.
 		 */
-		var exceptWithClass  = function(className) {
+		var exceptWithClass = function(className) {
 			return modulesByClass(className, false);
 		};
 
@@ -438,10 +440,10 @@ var MM = (function() {
 			});
 		};
 
-		if (typeof modules.withClass === "undefined") { Object.defineProperty(modules, "withClass",  {value: withClass, enumerable: false}); }
-		if (typeof modules.exceptWithClass === "undefined") { Object.defineProperty(modules, "exceptWithClass",  {value: exceptWithClass, enumerable: false}); }
-		if (typeof modules.exceptModule === "undefined") { Object.defineProperty(modules, "exceptModule",  {value: exceptModule, enumerable: false}); }
-		if (typeof modules.enumerate === "undefined") { Object.defineProperty(modules, "enumerate",  {value: enumerate, enumerable: false}); }
+		if (typeof modules.withClass === "undefined") { Object.defineProperty(modules, "withClass", {value: withClass, enumerable: false}); }
+		if (typeof modules.exceptWithClass === "undefined") { Object.defineProperty(modules, "exceptWithClass", {value: exceptWithClass, enumerable: false}); }
+		if (typeof modules.exceptModule === "undefined") { Object.defineProperty(modules, "exceptModule", {value: exceptModule, enumerable: false}); }
+		if (typeof modules.enumerate === "undefined") { Object.defineProperty(modules, "enumerate", {value: enumerate, enumerable: false}); }
 	};
 
 	return {
