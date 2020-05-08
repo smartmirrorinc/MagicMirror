@@ -1,7 +1,7 @@
 """MagicMirror Management Protocol Server"""
 import os
 import subprocess
-from flask import Flask, request
+from flask import Flask, request, jsonify
 import json
 
 CONFIG_FILE_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "../config/config.js")
@@ -21,7 +21,7 @@ def _ret_unknown_module(module):
 
 
 def _ret_unknown_param(param):
-    return "Found no matching params for '{}'".format(param), 404
+    return ("Found no matching params for '{}'".format(param), 404)
 
 
 def _ret_invalid_request(missing_property):
@@ -79,7 +79,7 @@ def manage_restart(action):
 
 @app.route('/config/top/', methods=['GET'])
 def config_top_get():
-    return read_config()
+    return jsonify(read_config())
 
 
 @app.route('/config/top/', methods=['POST'])
@@ -98,7 +98,7 @@ def config_top_path_get(path):
         return end_node
 
     ret = {"value": end_node}
-    return ret
+    return jsonify(ret)
 
 
 @app.route('/config/top/<path:path>/', methods=['POST'])
@@ -128,7 +128,7 @@ def config_top_path_set(path):
 def config_module_list():
     config = read_config()
     ret = {"modules": [x["module"] for x in config["modules"]]}
-    return ret
+    return jsonify(ret)
 
 
 @app.route('/config/modules/', methods=['POST'])
@@ -155,7 +155,7 @@ def config_module_get(module):
         return _ret_unknown_module(module)
 
     ret = {"value": module[0]}
-    return ret
+    return jsonify(ret)
 
 
 @app.route('/config/modules/<string:module>/', methods=['POST'])
@@ -188,7 +188,7 @@ def config_module_get_path(modulename, path):
         return end_node
 
     ret = {"value": end_node}
-    return ret
+    return jsonify(ret)
 
 
 @app.route('/config/modules/<string:modulename>/<path:path>/', methods=['POST'])
