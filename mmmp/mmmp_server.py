@@ -70,11 +70,25 @@ def read_config():
 
 
 @app.route('/manage/<string:action>/', methods=['GET'])
-def manage_restart(action):
-    if action not in ["start", "stop", "restart"]:
-        return _ret_unknown_action(action)
-    subprocess.call("pm2 {} mm".format(action).split(" "))
-    return _ret_ok()
+def manage_action(action):
+    if action == "listmodules":
+        thisdir = os.path.dirname(os.path.abspath(__file__))
+
+        default_modules = str(subprocess.check_output("ls {}".format(os.path.abspath(os.path.join(thisdir, "../modules/default/"))).split(" "))).split("\\n")
+        default_modules = [x for x in default_modules if os.path.isdir(os.path.join(thisdir, "../modules/default/", x))]
+
+        custom_modules = str(subprocess.check_output("ls {}".format(os.path.join(thisdir, "../modules/")).split(" "))).split("\\n")
+        custom_modules = [x for x in custom_modules if os.path.isdir(os.path.join(thisdir, "../modules/", x))]
+        custom_modules = [x for x in custom_modules if x != "default"]
+
+        all_modules = default_modules + custom_modules
+        return jsonify({"value": all_modules})
+
+    if action in ["start", "stop", "restart"]:
+        subprocess.call("pm2 {} mm".format(action).split(" "))
+        return _ret_ok()
+
+    return _ret_unknown_action(action)
 
 
 @app.route('/config/top/', methods=['GET'])
