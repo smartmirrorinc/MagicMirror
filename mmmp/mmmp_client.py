@@ -55,6 +55,7 @@ class EditModuleForm(npyscreen.ActionFormV2WithMenus):
         self.manage_menu.addItem(text="Restart", onSelect=self.menu_manage_restart)
         self.manage_menu.addItem(text="Stop", onSelect=self.menu_manage_stop)
         self.manage_menu.addItem(text="Start", onSelect=self.menu_manage_start)
+        self.manage_menu.addItem(text="HDMI ON", onSelect=self.menu_manage_hdmi_on)
 
         self.nav_menu.addItem(text="Quit", onSelect=self.quit)
 
@@ -93,6 +94,10 @@ class EditModuleForm(npyscreen.ActionFormV2WithMenus):
     def menu_manage_start(self):
         do_get("/manage/start/")
         npyscreen.notify_confirm("MagicMirror starting", title='Success')
+
+    def menu_manage_hdmi_on(self):
+        do_get("/manage/hdmi_on/")
+        npyscreen.notify_confirm("HDMI turning ON", title='Success')
 
     def populate(self):
         self.modules.values = do_get("config/modules/")["modules"]

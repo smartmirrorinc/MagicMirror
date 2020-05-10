@@ -84,6 +84,12 @@ def manage_action(action):
         all_modules = default_modules + custom_modules
         return jsonify({"value": all_modules})
 
+    if action == "hdmi_on":
+        thisdir = os.path.dirname(os.path.abspath(__file__))
+        hdmi_on_script = os.path.abspath(os.path.join(thisdir, "../modules/MMM-PIR-Sensor/hdmi-on.sh"))
+        subprocess.call("/bin/bash {}".format(hdmi_on_script).split(" "))
+        return _ret_ok()
+
     if action in ["start", "stop", "restart"]:
         subprocess.call("pm2 {} mm".format(action).split(" "))
         return _ret_ok()
