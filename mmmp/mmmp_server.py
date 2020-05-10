@@ -183,6 +183,12 @@ def config_module_set(module):
         config["modules"] = modules
         write_config(config)
         return _ret_ok()
+    elif action == "update":
+        modules = [x for x in config["modules"] if x["module"] != module]
+        modules.append(request.json["value"])
+        config["modules"] = modules
+        write_config(config)
+        return _ret_ok()
     else:
         return _ret_unknown_action(action)
 
