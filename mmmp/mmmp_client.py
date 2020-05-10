@@ -120,6 +120,7 @@ class EditModuleForm(npyscreen.ActionFormV2WithMenus):
             try:
                 do_post_json("config/modules/{}/".format(module), 
                              {"action": "update", "value": json.loads(edittxt)})
+                self.populate()
                 npyscreen.notify_confirm("Changes saved", title='Success')
             except json.decoder.JSONDecodeError as ex:
                 npyscreen.notify_confirm("JSON decode error at line {}, col {}:\n{}"\

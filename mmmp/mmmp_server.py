@@ -38,8 +38,13 @@ def _traverse_module(module, path):
     return True, end_node
 
 
+def _sort_modules(module_list):
+    return sorted(module_list, key=lambda x: x["order"] if "order" in x else 100000)
+
+
 def write_config(config_json):
     """Write Python dict as JSON to format compatible with MagicMirror JS"""
+    config_json["modules"] = _sort_modules(config_json["modules"])
     with open(CONFIG_FILE_PATH, "w") as f:
         f.write("/* Auto-generated file, do not edit */\n")
         f.write("var config = ")
