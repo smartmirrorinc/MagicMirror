@@ -16,6 +16,10 @@ def _ret_ok():
     return "OK", 200
 
 
+def _ret_unknown_template(template):
+    return "Found no matching templates for '{}'".format(template), 404
+
+
 def _ret_unknown_module(module):
     return "Found no matching modules for '{}'".format(module), 404
 
@@ -169,6 +173,18 @@ def config_module_add():
         return _ret_ok()
     else:
         return _ret_unknown_action(action)
+
+
+@app.route('/template/modules/<string:module>/', methods=['GET'])
+def template_module_get(module):
+    tmplfile = "templates/{}.json".format(module)
+
+    if os.path.isfile(tmplfile):
+        with open(tmplfile, "r") as f:
+            tmpl = json.loads(f.read())
+            return jsonify({"value": tmpl})
+
+    return _ret_unknown_template(module)
 
 
 @app.route('/config/modules/<string:module>/', methods=['GET'])

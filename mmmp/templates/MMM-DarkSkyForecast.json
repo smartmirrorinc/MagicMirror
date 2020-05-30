@@ -1,0 +1,16 @@
+{
+    "config": {
+        "apikey": "<your personal API key>",
+        "forecastLayout": "table",
+        "hourlyForecastInterval": 6,
+        "label_timeFormat": "HH:mm",
+        "latitude": "57.048820",
+        "longitude": "9.921747",
+        "units": "si"
+    },
+    "module": "MMM-DarkSkyForecast",
+    "position": "top_right",
+    "_meta": {
+        "help-url": "https://github.com/jclarke0000/MMM-DarkSkyForecast"
+    }
+}

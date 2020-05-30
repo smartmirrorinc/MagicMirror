@@ -1,0 +1,8 @@
+{
+    "module": "clock",
+    "position": "top_left",
+    "order": 100,
+    "_meta": {
+        "help-url": "https://docs.magicmirror.builders/modules/clock.html"
+    }
+}

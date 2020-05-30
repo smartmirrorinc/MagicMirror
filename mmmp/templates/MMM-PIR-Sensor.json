@@ -1,0 +1,11 @@
+{
+    "config": {
+        "powerSavingDelay": 300,
+        "powerSavingNotification": false,
+        "sensorPin": 23
+    },
+    "module": "MMM-PIR-Sensor",
+    "_meta": {
+        "help-url": "https://github.com/smartmirrorinc/MMM-PIR-Sensor"
+    }
+}

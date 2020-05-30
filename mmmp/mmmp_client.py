@@ -10,10 +10,17 @@ PORT = "5000"
 URL = "http://{}:{}/".format(HOST, PORT)
 
 
+class Get404Exception(Exception):
+    pass
+
+
 def do_get(path):
     r = requests.get('{}{}'.format(URL, path))
     if r.status_code != 200:
-        raise NotImplementedError("Request failed")
+        if r.status_code == 404:
+            raise Get404Exception()
+        else:
+            raise NotImplementedError("Request failed")
     try:
         return r.json()
     except:
@@ -58,6 +65,17 @@ class EditModuleForm(npyscreen.ActionFormV2WithMenus):
         self.manage_menu.addItem(text="HDMI ON", onSelect=self.menu_manage_hdmi_on)
 
         self.nav_menu.addItem(text="Quit", onSelect=self.quit)
+
+        self.add_handlers({"h": self.show_helptxt})
+
+    def show_helptxt(self, key):
+        if self.modules.value is not None and self.modules.value < len(self.modules.values):
+            module = self.modules.values[self.modules.value]
+            curr = do_get("config/modules/{}/".format(module))["value"]
+            if "_meta" in curr and "help-url" in curr["_meta"]:
+                npyscreen.notify_confirm(curr["_meta"]["help-url"], title='Help')
+                return
+        npyscreen.notify_confirm("No help available", title='Help')
 
     def quit(self):
         sys.exit()
@@ -109,6 +127,11 @@ class EditModuleForm(npyscreen.ActionFormV2WithMenus):
             module = self.modules.values[self.modules.value]
             if module != self.lastmodule:
                 curr = do_get("config/modules/{}/".format(module))["value"]
+                if "_meta" in curr:
+                    self.current_module_meta = curr["_meta"]
+                    del curr["_meta"]
+                else:
+                    self.current_module_meta = None
                 self.editfield.value = json.dumps(curr, indent=2)
                 self.lastmodule = module
 
@@ -118,8 +141,11 @@ class EditModuleForm(npyscreen.ActionFormV2WithMenus):
             module = self.modules.values[self.modules.value]
 
             try:
+                edittxt_dict = json.loads(edittxt)
+                if self.current_module_meta is not None:
+                    edittxt_dict["_meta"] = self.current_module_meta
                 do_post_json("config/modules/{}/".format(module), 
-                             {"action": "update", "value": json.loads(edittxt)})
+                             {"action": "update", "value": edittxt_dict})
                 self.populate()
                 npyscreen.notify_confirm("Changes saved", title='Success')
             except json.decoder.JSONDecodeError as ex:
@@ -165,7 +191,11 @@ class AddInstalledForm(npyscreen.ActionPopup):
                 npyscreen.notify_confirm("Cannot add module {} twice".format(module_to_add), 
                                          title='Error')
             else:
-                d = {"module": module_to_add}
+                try:
+                    d = do_get("template/modules/{}".format(module_to_add))["value"]
+                except Get404Exception:
+                    d = {"module": module_to_add}
+
                 do_post_json("config/modules/", 
                              {"action": "add", "value": d})
                 self.parentApp.editmoduleform.populate()

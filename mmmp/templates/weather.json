@@ -1,0 +1,10 @@
+{
+    "module": "weather",
+    "position": "top_right",
+    "config": {
+        "type": "current"
+    },
+    "_meta": {
+        "help-url": "https://docs.magicmirror.builders/modules/weather.html"
+    }
+}

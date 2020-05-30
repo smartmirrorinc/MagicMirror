@@ -1,0 +1,63 @@
+{
+    "config": {
+        "calendars": [
+            {
+                "name": "Helligdage",
+                "url": "webcal://ugenr.dk/ics/helligdage/dk.ics"
+            },
+            {
+                "name": "Launches",
+                "url": "https://space.floern.com/launch.ics"
+            }
+        ],
+        "rotateInterval": 10000,
+        "scenes": [
+            {
+                "name": "DEFAULT",
+                "views": [
+                    "Overview Helligdage"
+                ]
+            },
+            {
+                "name": "LaunchMode",
+                "views": [
+                    "Overview Launches"
+                ]
+            }
+        ],
+        "views": [
+            {
+                "calendars": [
+                    "Helligdage"
+                ],
+                "filterPassedEvent": true,
+                "hideOverflow": false,
+                "locale": "da",
+                "mode": "daily",
+                "name": "Overview Helligdage",
+                "position": "bottom_bar",
+                "slotCount": 5,
+                "title": "Helligdage",
+                "type": "row"
+            },
+            {
+                "calendars": [
+                    "Launches"
+                ],
+                "filterPassedEvent": true,
+                "hideOverflow": false,
+                "locale": "en",
+                "mode": "daily",
+                "name": "Overview Launches",
+                "position": "bottom_bar",
+                "slotCount": 5,
+                "title": "Upcoming launches",
+                "type": "row"
+            }
+        ]
+    },
+    "module": "MMM-CalendarExt2",
+    "_meta": {
+        "help-url": "https://github.com/MMM-CalendarExt2/MMM-CalendarExt2"
+    }
+}

@@ -1,0 +1,19 @@
+{
+    "config": {
+        "broadcastNewsFeeds": true,
+        "broadcastNewsUpdates": true,
+        "feeds": [
+            {
+                "title": "DR",
+                "url": "http://www.dr.dk/nyheder/service/feeds/allenyheder"
+            }
+        ],
+        "showPublishDate": true,
+        "showSourceTitle": true
+    },
+    "module": "newsfeed",
+    "position": "top_center",
+    "_meta": {
+        "help-url": "https://docs.magicmirror.builders/modules/newsfeed.html"
+    }
+}

@@ -1,0 +1,12 @@
+{
+    "module": "weatherforecast",
+    "position": "top_right",
+    "config": {
+        "location": "Aalborg,Denmark",
+        "locationID": "<Location ID from http://bulk.openweathermap.org/sample/city.list.json.gz>",
+        "appid": "<personal openweathermap.org API key>"
+    },
+    "_meta": {
+        "help-url": "https://docs.magicmirror.builders/modules/weatherforecast.html"
+    }
+}
