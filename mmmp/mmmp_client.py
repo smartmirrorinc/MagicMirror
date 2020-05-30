@@ -47,6 +47,7 @@ class EditModuleForm(npyscreen.ActionFormV2WithMenus):
     def create(self):
         self.text = self.add(npyscreen.FixedText, value="")
         self.modules = self.add(npyscreen.MultiLine, values=[], width=20)
+        self.modules.value_changed_callback = self.populate_and_goto_editfield
         self.nextrely = 3
         self.nextrelx = 30
         self.editfield = self.add(npyscreen.MultiLineEdit, name="edittxt", value="", title="asdf")
@@ -120,7 +121,7 @@ class EditModuleForm(npyscreen.ActionFormV2WithMenus):
     def populate(self):
         self.modules.values = do_get("config/modules/")["modules"]
 
-    def while_editing(self, args):
+    def populate_and_goto_editfield(self, widget):
         if self.modules.value is None or self.modules.value >= len(self.modules.values):
             self.editfield.value = ""
         else:
@@ -134,6 +135,8 @@ class EditModuleForm(npyscreen.ActionFormV2WithMenus):
                     self.current_module_meta = None
                 self.editfield.value = json.dumps(curr, indent=2)
                 self.lastmodule = module
+                self.modules.display()
+                self.editfield.edit()
 
     def on_ok(self):
         if self.modules.value is not None:
