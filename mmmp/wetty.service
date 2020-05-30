@@ -1,0 +1,11 @@
+[Unit]
+Description=Wetty Web Terminal
+After=network.target
+
+[Service]
+ExecStart=/usr/local/bin/wetty -p 3000
+Type=simple
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
