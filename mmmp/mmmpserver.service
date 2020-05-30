@@ -1,0 +1,13 @@
+[Unit]
+Description=MagicMirror Management Protocol Server
+After=network.target
+
+[Service]
+WorkingDirectory=/home/pi/MagicMirror/mmmp
+ExecStart=/usr/local/bin/gunicorn -b 0.0.0.0:5000 mmmp_server:app
+User=pi
+Type=simple
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
