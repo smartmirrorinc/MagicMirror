@@ -1,8 +1,10 @@
 """MagicMirror Management Protocol Server"""
 import os
 import subprocess
-from flask import Flask, request, jsonify
+import glob
 import json
+from flask import Flask, request, jsonify
+
 
 CONFIG_FILE_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "../config/config.js")
 app = Flask(__name__)
@@ -34,7 +36,7 @@ def _ret_invalid_request(missing_property):
 
 def _traverse_module(module, path):
     end_node = module
-    for i in range(len(path)):
+    for i in range(len(path)):  # pylint: disable=consider-using-enumerate
         if path[i] not in end_node:
             return False, _ret_unknown_param("/".join(path[:i+1]))
         end_node = end_node[path[i]]
@@ -43,7 +45,9 @@ def _traverse_module(module, path):
 
 
 def _sort_modules(module_list):
-    return sorted(module_list, key=lambda x: x["order"] if "order" in x else 100000)
+    return sorted(
+        module_list,
+        key=lambda x: x["_meta"]["order"] if "_meta" in x and "order" in x["_meta"] else 100000)
 
 
 def write_config(config_json):
@@ -80,26 +84,38 @@ def read_config():
 
 @app.route('/manage/<string:action>/', methods=['GET'])
 def manage_action(action):
-    if action == "listmodules":
+    """Management actions
+
+    Handle management actions that are not directly related to a specific
+    module, but manage the MagicMirror service. Actions such as
+    start/stop/restart, turning the monitor on and off etc. belong here.
+    """
+    if action == "listmodules":  # list available modules
         thisdir = os.path.dirname(os.path.abspath(__file__))
 
-        default_modules = str(subprocess.check_output("ls {}".format(os.path.abspath(os.path.join(thisdir, "../modules/default/"))).split(" "))).split("\\n")
-        default_modules = [x for x in default_modules if os.path.isdir(os.path.join(thisdir, "../modules/default/", x))]
+        # default modules are represented by directories in modules/default/
+        default_modules = os.path.abspath(os.path.join(thisdir, "../modules/default/*"))
+        default_modules = [x for x in glob.glob(default_modules) if os.path.isdir(x)]
 
-        custom_modules = str(subprocess.check_output("ls {}".format(os.path.join(thisdir, "../modules/")).split(" "))).split("\\n")
-        custom_modules = [x for x in custom_modules if os.path.isdir(os.path.join(thisdir, "../modules/", x))]
-        custom_modules = [x for x in custom_modules if x != "default"]
+        # custom modules are represented by directories in modules/ (except "default")
+        custom_modules = os.path.abspath(os.path.join(thisdir, "../modules/*"))
+        custom_modules = [x for x in glob.glob(custom_modules) if os.path.isdir(x)
+                          and os.path.basename(x) != "default"]
 
+        # build list of all module names
         all_modules = default_modules + custom_modules
+        all_modules = [os.path.basename(x) for x in all_modules]
+
         return jsonify({"value": all_modules})
 
-    if action == "hdmi_on":
+    if action == "hdmi_on":  # force monitor ON
         thisdir = os.path.dirname(os.path.abspath(__file__))
-        hdmi_on_script = os.path.abspath(os.path.join(thisdir, "../modules/MMM-PIR-Sensor/hdmi-on.sh"))
+        hdmi_on_script = os.path.abspath(os.path.join(
+            thisdir, "../modules/MMM-PIR-Sensor/hdmi-on.sh"))
         subprocess.call("/bin/bash {}".format(hdmi_on_script).split(" "))
         return _ret_ok()
 
-    if action in ["start", "stop", "restart"]:
+    if action in ["start", "stop", "restart"]:  # start/stop/restart MagicMirror² service
         subprocess.call("pm2 {} mm".format(action).split(" "))
         return _ret_ok()
 
@@ -108,17 +124,23 @@ def manage_action(action):
 
 @app.route('/config/top/', methods=['GET'])
 def config_top_get():
+    """Get the entire config file"""
     return jsonify(read_config())
 
 
 @app.route('/config/top/', methods=['POST'])
 def config_top_set():
+    """Set the entire config file"""
     write_config(request.json)
     return _ret_ok()
 
 
 @app.route('/config/top/<path:path>/', methods=['GET'])
 def config_top_path_get(path):
+    """Get entry in config top-level
+
+    For anything not in the modules section.
+    """
     config = read_config()
 
     path = path.split("/")
@@ -132,6 +154,10 @@ def config_top_path_get(path):
 
 @app.route('/config/top/<path:path>/', methods=['POST'])
 def config_top_path_set(path):
+    """Set entry in config top-level
+
+    For anything not in the modules section.
+    """
     config = read_config()
     action = request.json["action"]
 
@@ -155,6 +181,10 @@ def config_top_path_set(path):
 
 @app.route('/config/modules/', methods=['GET'])
 def config_module_list():
+    """List configured modules
+
+    For available modules, refer to manage/listmodules
+    """
     config = read_config()
     ret = {"modules": [x["module"] for x in config["modules"]]}
     return jsonify(ret)
@@ -162,6 +192,10 @@ def config_module_list():
 
 @app.route('/config/modules/', methods=['POST'])
 def config_module_add():
+    """Add module for configuration
+
+    Add an available module to the config file
+    """
     config = read_config()
     action = request.json["action"]
 
@@ -177,6 +211,7 @@ def config_module_add():
 
 @app.route('/template/modules/<string:module>/', methods=['GET'])
 def template_module_get(module):
+    """Get template configuration for a module"""
     tmplfile = "templates/{}.json".format(module)
 
     if os.path.isfile(tmplfile):
@@ -189,6 +224,7 @@ def template_module_get(module):
 
 @app.route('/config/modules/<string:module>/', methods=['GET'])
 def config_module_get(module):
+    """Get current configuration of an entire module"""
     config = read_config()
     module = [x for x in config["modules"] if x["module"] == module]
 
@@ -201,6 +237,7 @@ def config_module_get(module):
 
 @app.route('/config/modules/<string:module>/', methods=['POST'])
 def config_module_set(module):
+    """Change or delete configuration of an entire module"""
     config = read_config()
 
     action = request.json["action"]
@@ -222,6 +259,7 @@ def config_module_set(module):
 
 @app.route('/config/modules/<string:modulename>/<path:path>/', methods=['GET'])
 def config_module_get_path(modulename, path):
+    """Get single parameter of a module"""
     config = read_config()
     module = [x for x in config["modules"] if x["module"] == modulename]
 
@@ -240,6 +278,7 @@ def config_module_get_path(modulename, path):
 
 @app.route('/config/modules/<string:modulename>/<path:path>/', methods=['POST'])
 def config_module_set_path(modulename, path):
+    """Set or delete single parameter of a module"""
     config = read_config()
     module = [x for x in config["modules"] if x["module"] == modulename]
     path = path.split("/")
@@ -267,7 +306,7 @@ def config_module_set_path(modulename, path):
 
     else:
         return _ret_unknown_action(action)
-        
+
     write_config(config)
     return _ret_ok()
 
