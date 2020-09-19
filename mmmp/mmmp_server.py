@@ -26,6 +26,10 @@ def _ret_unknown_module(module):
     return "Found no matching modules for '{}'".format(module), 404
 
 
+def _ret_corrupt_config(msg):
+    return "Configuration file format error: '{}'".format(msg), 404
+
+
 def _ret_unknown_param(param):
     return ("Found no matching params for '{}'".format(param), 404)
 
@@ -48,6 +52,25 @@ def _sort_modules(module_list):
     return sorted(
         module_list,
         key=lambda x: x["_meta"]["order"] if "_meta" in x and "order" in x["_meta"] else 100000)
+
+
+def _get_available_modules():
+    thisdir = os.path.dirname(os.path.abspath(__file__))
+
+    # default modules are represented by directories in modules/default/
+    default_modules = os.path.abspath(os.path.join(thisdir, "../modules/default/*"))
+    default_modules = [x for x in glob.glob(default_modules) if os.path.isdir(x)]
+
+    # custom modules are represented by directories in modules/ (except "default")
+    custom_modules = os.path.abspath(os.path.join(thisdir, "../modules/*"))
+    custom_modules = [x for x in glob.glob(custom_modules) if os.path.isdir(x)
+                      and os.path.basename(x) != "default"]
+
+    # build list of all module names
+    all_modules = default_modules + custom_modules
+    all_modules = [os.path.basename(x) for x in all_modules]
+
+    return all_modules
 
 
 def write_config(config_json):
@@ -91,21 +114,7 @@ def manage_action(action):
     start/stop/restart, turning the monitor on and off etc. belong here.
     """
     if action == "listmodules":  # list available modules
-        thisdir = os.path.dirname(os.path.abspath(__file__))
-
-        # default modules are represented by directories in modules/default/
-        default_modules = os.path.abspath(os.path.join(thisdir, "../modules/default/*"))
-        default_modules = [x for x in glob.glob(default_modules) if os.path.isdir(x)]
-
-        # custom modules are represented by directories in modules/ (except "default")
-        custom_modules = os.path.abspath(os.path.join(thisdir, "../modules/*"))
-        custom_modules = [x for x in glob.glob(custom_modules) if os.path.isdir(x)
-                          and os.path.basename(x) != "default"]
-
-        # build list of all module names
-        all_modules = default_modules + custom_modules
-        all_modules = [os.path.basename(x) for x in all_modules]
-
+        all_modules = _get_available_modules()
         return jsonify({"value": all_modules})
 
     if action == "hdmi_on":  # force monitor ON
@@ -183,10 +192,17 @@ def config_top_path_set(path):
 def config_module_list():
     """List configured modules
 
+    Return format:
+      {"modules": [
+        {"_meta": {"id": 0, ...}, "module": "clock"},
+        {"_meta": {"id": 1, ...}, "module": "alert"},
+        ...
+      ]}
+
     For available modules, refer to manage/listmodules
     """
     config = read_config()
-    ret = {"modules": [x["module"] for x in config["modules"]]}
+    ret = {"modules": [{"_meta": x["_meta"], "module": x["module"]} for x in config["modules"]]}
     return jsonify(ret)
 
 
@@ -194,7 +210,18 @@ def config_module_list():
 def config_module_add():
     """Add module for configuration
 
-    Add an available module to the config file
+    Add an available module to the config file. POST json object structure:
+
+        {"action": "add", "value": {
+            "module": "modulename",
+            "moduleprop": ...
+        }}
+
+    On success, an object with this structure is returned:
+
+        {"_meta": {"id": <new ID>}, "module": "modulename"}
+
+    Otherwise an error message and code.
     """
     config = read_config()
     action = request.json["action"]
@@ -202,16 +229,31 @@ def config_module_add():
     if action == "add":
         if "value" not in request.json:
             return _ret_invalid_request("value")
-        config["modules"].append(request.json["value"])
+        if "module" not in request.json["value"]:
+            return _ret_invalid_request("value/module")
+
+        moduletype = request.json["value"]["module"]
+
+        if moduletype not in _get_available_modules():
+            return _ret_unknown_module(moduletype)
+
+        newid = max([x["_meta"]["id"] for x in config["modules"]]) + 1
+        newmodule = request.json["value"]
+        if "_meta" not in newmodule:
+            newmodule["_meta"] = {}
+        newmodule["_meta"]["id"] = newid
+
+        config["modules"].append(newmodule)
         write_config(config)
-        return _ret_ok()
+        ret = {"_meta": {"id": newid}, "module": moduletype}
+        return jsonify(ret)
     else:
         return _ret_unknown_action(action)
 
 
 @app.route('/template/modules/<string:module>/', methods=['GET'])
 def template_module_get(module):
-    """Get template configuration for a module"""
+    """Get template configuration given module name"""
     tmplfile = "templates/{}.json".format(module)
 
     if os.path.isfile(tmplfile):
@@ -222,33 +264,35 @@ def template_module_get(module):
     return _ret_unknown_template(module)
 
 
-@app.route('/config/modules/<string:module>/', methods=['GET'])
-def config_module_get(module):
-    """Get current configuration of an entire module"""
+@app.route('/config/modules/<int:moduleid>/', methods=['GET'])
+def config_module_get(moduleid):
+    """Get current configuration of a module given its ID"""
     config = read_config()
-    module = [x for x in config["modules"] if x["module"] == module]
+    module = [x for x in config["modules"] if x["_meta"]["id"] == moduleid]
 
-    if len(module) != 1:
-        return _ret_unknown_module(module)
+    if len(module) == 0:
+        return _ret_unknown_module(moduleid)
+    elif len(module) > 1:
+        return _ret_corrupt_config(f"found '{len(module)}' modules with id '{moduleid}'")
 
     ret = {"value": module[0]}
     return jsonify(ret)
 
 
-@app.route('/config/modules/<string:module>/', methods=['POST'])
-def config_module_set(module):
-    """Change or delete configuration of an entire module"""
+@app.route('/config/modules/<int:moduleid>/', methods=['POST'])
+def config_module_set(moduleid):
+    """Change or delete configuration of a module give its ID"""
     config = read_config()
 
     action = request.json["action"]
 
     if action == "delete":
-        modules = [x for x in config["modules"] if x["module"] != module]
+        modules = [x for x in config["modules"] if x["_meta"]["id"] != moduleid]
         config["modules"] = modules
         write_config(config)
         return _ret_ok()
     elif action == "update":
-        modules = [x for x in config["modules"] if x["module"] != module]
+        modules = [x for x in config["modules"] if x["_meta"]["id"] != moduleid]
         modules.append(request.json["value"])
         config["modules"] = modules
         write_config(config)
@@ -257,14 +301,16 @@ def config_module_set(module):
         return _ret_unknown_action(action)
 
 
-@app.route('/config/modules/<string:modulename>/<path:path>/', methods=['GET'])
-def config_module_get_path(modulename, path):
-    """Get single parameter of a module"""
+@app.route('/config/modules/<int:moduleid>/<path:path>/', methods=['GET'])
+def config_module_get_path(moduleid, path):
+    """Get single parameter of a module given its ID"""
     config = read_config()
-    module = [x for x in config["modules"] if x["module"] == modulename]
+    module = [x for x in config["modules"] if x["_meta"]["id"] == moduleid]
 
-    if len(module) != 1:
-        return _ret_unknown_module(modulename)
+    if len(module) == 0:
+        return _ret_unknown_module(moduleid)
+    elif len(module) > 1:
+        return _ret_corrupt_config(f"found '{len(module)}' modules with id '{moduleid}'")
 
     path = path.split("/")
 
@@ -276,15 +322,17 @@ def config_module_get_path(modulename, path):
     return jsonify(ret)
 
 
-@app.route('/config/modules/<string:modulename>/<path:path>/', methods=['POST'])
-def config_module_set_path(modulename, path):
-    """Set or delete single parameter of a module"""
+@app.route('/config/modules/<int:moduleid>/<path:path>/', methods=['POST'])
+def config_module_set_path(moduleid, path):
+    """Set or delete single parameter of a module given its ID"""
     config = read_config()
-    module = [x for x in config["modules"] if x["module"] == modulename]
+    module = [x for x in config["modules"] if x["_meta"]["id"] == moduleid]
     path = path.split("/")
 
-    if len(module) != 1:
-        return _ret_unknown_module(modulename)
+    if len(module) == 0:
+        return _ret_unknown_module(moduleid)
+    elif len(module) > 1:
+        return _ret_corrupt_config(f"found '{len(module)}' modules with id '{moduleid}'")
 
     action = request.json["action"]
     if action == "update":
