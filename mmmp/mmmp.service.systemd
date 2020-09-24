@@ -1,0 +1,20 @@
+[Unit]
+Description = mmmp
+After = network.target
+
+[Service]
+PermissionsStartOnly = true
+PIDFile = /run/mmmp/mmmp.pid
+User = pi
+Group = pi
+WorkingDirectory = /home/pi/MagicMirror/mmmp
+ExecStartPre = /bin/mkdir /run/mmmp
+ExecStartPre = /bin/chown -R pi:pi /run/mmmp
+ExecStart = /usr/bin/env gunicorn3 mmmp_server:app -b 0.0.0.0:5000 --pid /run/mmmp/mmmp.pid
+ExecReload = /bin/kill -s HUP $MAINPID
+ExecStop = /bin/kill -s TERM $MAINPID
+ExecStopPost = /bin/rm -rf /run/mmmp
+PrivateTmp = true
+
+[Install]
+WantedBy = multi-user.target

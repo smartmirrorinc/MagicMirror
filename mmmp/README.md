@@ -9,6 +9,43 @@ Requires Python3, Flask and a WSGI HTTP server such as gunicorn. Run with:
 
 Currently runs in debug mode and allows connections from any IP. Manipulates local files (config.js). Use at own risk.
 
+## Systemd service
+
+To use the mmmp server as a systemd service, install the service file:
+
+    sudo cp mmmp.service.systemd /etc/systemd/system/mmmp.service
+
+And manage it:
+
+    sudo systemctl start mmmp.service
+    sudo systemctl stop mmmp.service
+    sudo systemctl status mmmp.service
+
+## Avahi
+
+To make the service discoverable using avahi, install the avahi daemon:
+
+    sudo apt install avahi-utils avahi-autoipd
+
+You might want to make the Raspberry Pi itself discoverable for convenience - to do so, edit `/etc/avahi/avahi-daemon.conf`, setting
+
+    publish-hinfo=yes
+    publish-workstation=yes
+
+And restart the avahi daemon:
+
+    systemctl restart avahi-daemon.service
+
+Install the mmmp avahi service file:
+
+    sudo cp mmmp.service.avahi /etc/avahi/services/mmmp.service
+
+The mmmp service should then be discoverable, e.g. using:
+
+    avahi-browse -tlr _mmmp._tcp
+
+## Config file
+
 Config file must be sanitized to allow parsing it with Pythons JSON module:
 
 - Only double quotes allowed
