@@ -202,7 +202,7 @@ def config_module_list():
     For available modules, refer to manage/listmodules
     """
     config = read_config()
-    ret = {"modules": [{"_meta": x["_meta"], "module": x["module"]} for x in config["modules"]]}
+    ret = {"modules": config["modules"]}
     return jsonify(ret)
 
 
