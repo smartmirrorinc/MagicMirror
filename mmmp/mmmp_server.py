@@ -241,6 +241,8 @@ def config_module_add():
         newmodule = request.json["value"]
         if "_meta" not in newmodule:
             newmodule["_meta"] = {}
+        if "_order" not in newmodule["_meta"]:
+            newmodule["_meta"]["order"] = 0
         newmodule["_meta"]["id"] = newid
 
         config["modules"].append(newmodule)
