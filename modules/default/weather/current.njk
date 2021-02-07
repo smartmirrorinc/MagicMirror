@@ -1,4 +1,7 @@
-{% if current %}
+{% if current or weatherData %}
+    {% if weatherData %}
+        {% set current = weatherData.current %}
+    {% endif %}
     {% if not config.onlyTemp %}
         <div class="normal medium">
             <span class="wi wi-strong-wind dimmed"></span>
@@ -6,7 +9,11 @@
                 {% if config.useBeaufort %}
                     {{ current.beaufortWindSpeed() | round }}
                 {% else %}
-                    {{ current.windSpeed | round }}
+                    {% if config.useKmh %}
+                        {{ current.kmhWindSpeed() | round }}
+                    {% else %}
+                        {{ current.windSpeed | round }}
+                    {% endif %}
                 {% endif %}
                 {% if config.showWindDirection %}
                     <sup>
@@ -22,14 +29,16 @@
             {% if config.showHumidity and current.humidity %}
                 <span>{{ current.humidity | decimalSymbol }}</span><sup>&nbsp;<i class="wi wi-humidity humidityIcon"></i></sup>
             {% endif %}
-            <span class="wi dimmed wi-{{ current.nextSunAction() }}"></span>
-            <span>
-                {% if current.nextSunAction() === "sunset" %}
-                    {{ current.sunset | formatTime }}
-                {% else %}
-                    {{ current.sunrise | formatTime }}
-                {% endif %}
-            </span>
+            {% if config.showSun %}
+                <span class="wi dimmed wi-{{ current.nextSunAction() }}"></span>
+                <span>
+                    {% if current.nextSunAction() === "sunset" %}
+                        {{ current.sunset | formatTime }}
+                    {% else %}
+                        {{ current.sunrise | formatTime }}
+                    {% endif %}
+                </span>
+            {% endif %}
         </div>
     {% endif %}
     <div class="large light">
@@ -60,7 +69,10 @@
         <div class="normal medium">
             {% if config.showFeelsLike %}
                 <span class="dimmed">
-                    {{ "FEELS" | translate }} {{ current.feelsLike() | roundValue | unit("temperature") | decimalSymbol }}
+                    {{ "FEELS" | translate({DEGREE: current.feelsLike() | roundValue | unit("temperature") | decimalSymbol }) }} 
+					{% if not config.feelsLikeWithDegree %}
+					{{ current.feelsLike() | roundValue | unit("temperature") | decimalSymbol }}
+					{% endif %}
                 </span>
             {% endif %}
             {% if config.showPrecipitationAmount %}
