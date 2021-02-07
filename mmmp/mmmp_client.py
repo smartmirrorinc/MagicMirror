@@ -137,7 +137,7 @@ class EditModuleForm(npyscreen.ActionFormV2WithMenus):
                 self.editfield.value = json.dumps(curr, indent=2)
                 self.lastmodule = module
                 self.modules.display()
-                self.editfield.edit()
+                self.editfield.display()
 
     def on_ok(self):
         if self.modules.value is not None:
