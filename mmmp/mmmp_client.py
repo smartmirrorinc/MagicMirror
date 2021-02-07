@@ -41,7 +41,8 @@ class App(npyscreen.StandardApp):
         self.addmoduleform = self.addForm("ADDMODULE", AddModuleForm, name="Add custom module")
         self.addinstalledform = self.addForm("ADDINSTALLED", AddInstalledForm, name="Add installed module",
                                              lines=25)
-
+        import curses
+        curses.mousemask(0)
 
 class EditModuleForm(npyscreen.ActionFormV2WithMenus):
     def create(self):
