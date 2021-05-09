@@ -108,7 +108,7 @@ Example valid config.js:
                 "_meta": {
                     "id": 4,
                     "help-url": "https://docs.magicmirror.builders/modules/newsfeed.html"
-                }
+                },
                 "config": {
                     "broadcastNewsFeeds": true,
                     "broadcastNewsUpdates": true,
@@ -145,7 +145,7 @@ Example valid config.js:
         "timeFormat": 24,
         "units": "metric"
     };
-    
+
     /*************** DO NOT EDIT THE LINE BELOW ***************/
     if (typeof module !== "undefined") {module.exports = config;}
 
@@ -254,7 +254,7 @@ Tested with Python version 3.8.5/3.7.4 and flask version 1.0.2.
 
     [tausen@tausen-home mmmp]$ python -m json.tool allconf.json | grep 8080
         "port": 8080,
-    [tausen@tausen-home mmmp]$ sed -i 's/8080/8081/' allconf.json 
+    [tausen@tausen-home mmmp]$ sed -i 's/8080/8081/' allconf.json
     [tausen@tausen-home mmmp]$ python -m json.tool allconf.json | grep 8081
         "port": 8081,
     [tausen@tausen-home mmmp]$ curl -d "@allconf.json" -H "Content-Type: application/json" -X POST http://localhost:5000/config/top/
@@ -456,4 +456,3 @@ See also `/manage/start/`, `/manage/stop/` and `/manage/restart/`.
             "MMM-CalendarExt2"
         ]
     }
-
