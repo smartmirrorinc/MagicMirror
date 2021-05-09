@@ -4,10 +4,11 @@ import subprocess
 import glob
 import json
 from flask import Flask, request, jsonify
-
+from flask_cors import CORS
 
 CONFIG_FILE_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "../config/config.js")
 app = Flask(__name__)
+CORS(app)
 
 
 def _ret_unknown_action(action):
