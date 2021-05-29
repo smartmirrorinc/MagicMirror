@@ -1,17 +1,17 @@
 {
-    "config": {
-        "calendars": [
-            {
-                "symbol": "calendar-check",
-                "url": "webcal://ugenr.dk/ics/helligdage/dk.ics"
-            }
-        ]
-    },
-    "header": "Helligdage",
-    "module": "calendar",
-    "position": "top_left",
-    "order": 200,
-    "_meta": {
-        "help-url": "https://docs.magicmirror.builders/modules/calendar.html"
-    }
+	"config": {
+		"calendars": [
+			{
+				"symbol": "calendar-check",
+				"url": "webcal://ugenr.dk/ics/helligdage/dk.ics"
+			}
+		]
+	},
+	"header": "Helligdage",
+	"module": "calendar",
+	"position": "top_left",
+	"order": 200,
+	"_meta": {
+		"help-url": "https://docs.magicmirror.builders/modules/calendar.html"
+	}
 }

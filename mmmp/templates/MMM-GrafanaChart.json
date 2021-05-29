@@ -1,19 +1,19 @@
 {
-    "config": {
-        "dashboardname": "<dashboard>",
-        "height": "480px",
-        "host": "<hostname or IP>",
-        "port": "<host port, usually 3000>",
-        "id": "<dashboard ID, found after /d/ in URL>",
-        "orgId": "<organization ID, found after ?orgId= in URL>",
-        "panelId": "<panel ID, found after &panelId= in URL after clicking 'view' on desired chart>",
-        "refreshInterval": 900,
-        "version": "6",
-        "width": "650px"
-    },
-    "module": "MMM-GrafanaChart",
-    "position": "middle_center",
-    "_meta": {
-        "help-url": "https://github.com/SvenSommer/MMM-GrafanaChart"
-    }
+	"config": {
+		"dashboardname": "<dashboard>",
+		"height": "480px",
+		"host": "<hostname or IP>",
+		"port": "<host port, usually 3000>",
+		"id": "<dashboard ID, found after /d/ in URL>",
+		"orgId": "<organization ID, found after ?orgId= in URL>",
+		"panelId": "<panel ID, found after &panelId= in URL after clicking 'view' on desired chart>",
+		"refreshInterval": 900,
+		"version": "6",
+		"width": "650px"
+	},
+	"module": "MMM-GrafanaChart",
+	"position": "middle_center",
+	"_meta": {
+		"help-url": "https://github.com/SvenSommer/MMM-GrafanaChart"
+	}
 }

@@ -1,7 +1,7 @@
 {
-    "module": "MMM-ip",
-    "position": "bottom_right",
-    "_meta": {
-        "help-url": "https://github.com/fewieden/MMM-ip"
-    }
+	"module": "MMM-ip",
+	"position": "bottom_right",
+	"_meta": {
+		"help-url": "https://github.com/fewieden/MMM-ip"
+	}
 }

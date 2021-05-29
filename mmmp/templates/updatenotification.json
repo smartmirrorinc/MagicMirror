@@ -1,7 +1,7 @@
 {
-    "module": "updatenotification",
-    "position": "top_bar",
-    "_meta": {
-        "help-url": "https://docs.magicmirror.builders/modules/updatenotification.html"
-    }
+	"module": "updatenotification",
+	"position": "top_bar",
+	"_meta": {
+		"help-url": "https://docs.magicmirror.builders/modules/updatenotification.html"
+	}
 }
